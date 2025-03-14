@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Set up /redirect_me for 301 redirection.
+
+# Update the system and install nginx
+sudo apt-get -y update
+sudo apt-get -y install nginx
+
+# Create an index.html file with "Holberton School" text
+echo "Holberton School" | sudo tee /var/www/html/index.html
+
+# Configure Nginx to add the 301 redirection
+config_str="server_name _;\\n\\
+    location /redirect_me {\\n\\
+        return 301 https://github.com/VeronicahWanjuu;\\n\\
+    }"
+
+# Update the Nginx default configuration with sed
+sudo sed -i "s|server_name _;|$config_str|" /etc/nginx/sites-available/default
+
+# Test Nginx configuration for errors
+sudo nginx -t
+
+# Restart Nginx to apply the changes
+sudo service nginx restart
+
