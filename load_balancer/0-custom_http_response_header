@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Configures Nginx and adds a custom header with the server's hostname
+
+# Update package lists and install Nginx
+sudo apt-get update -y
+sudo apt-get install -y nginx
+
+# Enable the firewall and allow HTTP traffic
+sudo ufw enable
+sudo ufw allow 'Nginx HTTP'
+sudo ufw allow 'OpenSSH'
+
+# Create a simple index.html page
+echo 'Holberton School for the win!' | sudo tee /var/www/html/index.html
+
+# Custom header to identify which server is serving the request
+custom_header="server_name _;\n\tadd_header X-Served-By \$HOSTNAME;"
+
+# Modify the Nginx configuration to add the custom header
+sudo sed -i "s|server_name _;|$custom_header|" /etc/nginx/sites-enabled/default
+
+# Restart Nginx to apply the changes
+sudo service nginx restart
+
