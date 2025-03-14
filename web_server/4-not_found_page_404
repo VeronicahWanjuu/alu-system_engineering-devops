@@ -1,45 +1,38 @@
 #!/usr/bin/env bash
-# Sets up 404 error page and redirection
+# Sets up 404 error page
 
-# Update and install Nginx
+# Update and install nginx
 sudo apt-get update -y
 sudo apt-get install -y nginx
 
-# Allow HTTP traffic through firewall
+# Allow Nginx HTTP traffic through the firewall
 sudo ufw allow 'Nginx HTTP'
 
-# Create custom 404 error page
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html > /dev/null
+# Create custom 404 page content
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html
 
-# Create default index.html
-echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
+# Nginx configuration to handle 404 errors
+config="server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+        error_page 404 /404.html;
+        server_name _;
 
-# Nginx configuration
-config="
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
+        location / {
+                try_files \$uri \$uri/ =404;
+        }
 
-    server_name _;
+        location /redirect_me {
+                return 301 https://github.com/VeronicahWanjuu;
+        }
+}"
 
-    # Custom 404 Page
-    error_page 404 /404.html;
+# Set up the default webpage and the configuration file for Nginx
+echo "Holberton School" | sudo tee /var/www/html/index.html
+echo "$config" | sudo tee /etc/nginx/sites-available/default
 
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-
-    # Redirection
-    location /redirect_me {
-        return 301 https://github.com/VeronicahWanjuu;
-    }
-}
-"
-
-# Apply Nginx configuration
-echo "$config" | sudo tee /etc/nginx/sites-available/default > /dev/null
-
-# Restart Nginx
+# Restart Nginx to apply changes
 sudo service nginx restart
+
