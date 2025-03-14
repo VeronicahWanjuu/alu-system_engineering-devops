@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Sets up 404 error page and redirection
+
+# Update and install Nginx
+sudo apt-get update -y
+sudo apt-get install -y nginx
+
+# Allow HTTP traffic through firewall
+sudo ufw allow 'Nginx HTTP'
+
+# Create custom 404 error page
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html > /dev/null
+
+# Create default index.html
+echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
+
+# Nginx configuration
+config="
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    # Custom 404 Page
+    error_page 404 /404.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    # Redirection
+    location /redirect_me {
+        return 301 https://github.com/VeronicahWanjuu;
+    }
+}
+"
+
+# Apply Nginx configuration
+echo "$config" | sudo tee /etc/nginx/sites-available/default > /dev/null
+
+# Restart Nginx
+sudo service nginx restart
