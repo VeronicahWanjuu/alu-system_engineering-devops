@@ -1,35 +1,22 @@
 #!/usr/bin/env bash
-# Configures Nginx and adds a custom header with the server's hostname
+# Configure Nginx with custom HTTP header
 
-# Update package lists and install Nginx
-sudo apt-get update -y
-sudo apt-get install -y nginx
+# Update and install Nginx
+sudo apt update -y
+sudo apt install nginx -y
 
-# Enable the firewall and allow HTTP traffic
-sudo ufw enable
-sudo ufw allow 'Nginx HTTP'
-sudo ufw allow 'OpenSSH'
+# code to add header to display hostname
+string_for_replacement="server_name _;\n\tadd_header X-Served-By \$hostname;"
+sudo sed -i "s/server_name _;/$string_for_replacement/" /etc/nginx/sites-enabled/default
 
-# Create a simple index.html page
-echo 'Holberton School for the win!' | sudo tee /var/www/html/index.html
+# Test Nginx configuration
+sudo nginx -t
 
-# Custom header to identify which server is serving the request
-custom_header="server_name _;\n\tadd_header X-Served-By \$HOSTNAME;"
-
-# Modify the Nginx configuration to add the custom header
-sudo sed -i "s|server_name _;|$custom_header|" /etc/nginx/sites-enabled/default
-
-# Restart Nginx to apply the changes
-sudo service nginx restart
-
-# Step 5: Verify that the configuration is correct and return the correct exit code
-curl -sI localhost | grep "X-Served-By"
-
-# If the curl command successfully returns the X-Served-By header, exit with status 1
+# If the test is successful, restart Nginx
 if [ $? -eq 0 ]; then
-    echo "Nginx is configured correctly with the custom header."
-    exit 1
+    sudo service nginx restart
+    echo "Nginx configuration updated and restarted successfully."
 else
-    echo "There was an error configuring Nginx."
-    exit 0
+    echo "Nginx configuration test failed. Please check the configuration."
+    exit 1
 fi
