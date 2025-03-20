@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Update package lists
+sudo apt-get update -y
+
+# Install HAProxy
+sudo apt-get install -y haproxy
+
+# Configure HAProxy to load balance traffic between web-01 and web-02
+echo "
+frontend http_front
+    bind *:80
+    default_backend http_back
+
+backend http_back
+    balance roundrobin
+    server web-01 35.171.163.227:80 check
+    server web-02 34.207.192.59:80 check
+" | sudo tee /etc/haproxy/haproxy.cfg
+
+# Enable HAProxy to start on boot
+sudo systemctl enable haproxy
+
+# Start or restart HAProxy to apply the changes
+sudo systemctl restart haproxy
+
+# Output the status of HAProxy to ensure it's running correctly
+sudo systemctl status haproxy
+
