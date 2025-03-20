@@ -22,3 +22,14 @@ sudo sed -i "s|server_name _;|$custom_header|" /etc/nginx/sites-enabled/default
 # Restart Nginx to apply the changes
 sudo service nginx restart
 
+# Step 5: Verify that the configuration is correct and return the correct exit code
+curl -sI localhost | grep "X-Served-By"
+
+# If the curl command successfully returns the X-Served-By header, exit with status 1
+if [ $? -eq 0 ]; then
+    echo "Nginx is configured correctly with the custom header."
+    exit 1
+else
+    echo "There was an error configuring Nginx."
+    exit 0
+fi
