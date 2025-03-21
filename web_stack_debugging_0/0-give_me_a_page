@@ -1,3 +1,16 @@
 #!/usr/bin/env bash
-# Ensure that the Apache Server is started
-service apache2 start
+# Ensure that the Apache Server is installed and started
+
+# Install Apache if not installed
+sudo apt update
+sudo apt install -y apache2
+
+# Start Apache
+sudo service apache2 start
+
+# Verify that Apache is running
+if sudo service apache2 status | grep -q "active (running)"; then
+    echo "apache2 is running"
+else
+    echo "apache2 failed to start"
+fi
